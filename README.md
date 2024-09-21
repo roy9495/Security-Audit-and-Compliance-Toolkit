@@ -8,6 +8,9 @@ This toolkit allows you to run basic security audits like firewall status checks
 
 - Firewall Audit
 - User Audit
+- HIPAA Compliance
+- ISO 27001 Compliance
+- PCI DSS Compliance
 
 ## Setup
 
