@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Security Audit and Compliance Toolkit</h1>
+        
+        <button onclick="runTask('firewall', 'audit')">Run Firewall Audit</button>
+        <button onclick="runTask('users', 'audit')">Run User Audit</button>
+        <button onclick="runTask('iso27001', 'compliance')">ISO 27001 Compliance</button>
+        <button onclick="runTask('pci-dss', 'compliance')">PCI-DSS Compliance</button>
+        <button onclick="runTask('hipaa', 'compliance')">HIPAA Compliance</button><br>
+        <button onclick="runSecurityCheck('patch_management')">Patch Management</button>
+        <button onclick="runSecurityCheck('system_hardening')">System Hardening</button>
+        <button onclick="runSecurityCheck('privilege_escalation_test')">Privilege Escalation Test</button>
+        <button onclick="runSecurityCheck('intrusion_detection')">Intrusion Detection</button>
+        
+        <!-- Output Area -->
+        <pre id="audit-results">Audit results will appear here...</pre>
+    </div>
+
+    <script>
+        // General function to handle both audits and compliance tasks
+        function runTask(type, category) {
+            const resultsContainer = document.getElementById('audit-results');
+            // Clear previous results and display loading message
+            resultsContainer.innerText = `Running ${type.toUpperCase()} ${category}... Please wait.`;
+            
+            let endpoint = category === 'audit' ? `/api/${type}` : `/api/compliance/${type}`;
+            
+            // Fetch the data from the correct API endpoint
+            fetch(endpoint)
+                .then(response => response.json())
+                .then(data => {
+                    // Display the result in the preformatted text area
+                    resultsContainer.innerText = data.result;
+                })
+                .catch(error => {
+                    // Handle errors gracefully
+                    resultsContainer.innerText = `Error: ${error.message}`;
+                });
+        }
+
+        // Function to handle security checks
+        function runSecurityCheck(type) {
+            const resultsContainer = document.getElementById('audit-results');
+            // Clear previous results and display loading message
+            resultsContainer.innerText = `Running ${type.replace('_', ' ').toUpperCase()}... Please wait.`;
+            
+            // Fetch the data from the API endpoint for security checks
+            fetch(`/api/${type}`)
+                .then(response => response.json())
+                .then(data => {
+                    // Display the result in the preformatted text area
+                    resultsContainer.innerText = data.result;
+                })
+                .catch(error => {
+                    // Handle errors gracefully
+                    resultsContainer.innerText = `Error: ${error.message}`;
+                });
+        }
+    </script>
+</body>
+</html>
