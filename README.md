@@ -28,7 +28,8 @@ This toolkit allows you to run basic security audits like firewall status checks
    python app.py
    ```
 4. Open your browser and navigate to http://localhost:5000/
-5. The deployed app
+
+The deployed app
    <p align="center">
-    <img src="https://raw.githubusercontent.com/roy9495/Security-Audit-and-Compliance-Toolkit/refs/heads/main/Capturesecurity.PNG" width="512px" alt="Deployed App"/>
+    <img src="https://raw.githubusercontent.com/roy9495/Security-Audit-and-Compliance-Toolkit/refs/heads/main/Capturesecurity.PNG" width="80%" alt="Deployed App"/>
 </p>
