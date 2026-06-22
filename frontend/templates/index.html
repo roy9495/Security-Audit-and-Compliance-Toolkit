@@ -3,66 +3,456 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Audit Dashboard</title>
+    <title>Security Audit & Compliance Toolkit</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Security Audit and Compliance Toolkit</h1>
-        
-        <button onclick="runTask('firewall', 'audit')">Run Firewall Audit</button>
-        <button onclick="runTask('users', 'audit')">Run User Audit</button>
-        <button onclick="runTask('iso27001', 'compliance')">ISO 27001 Compliance</button>
-        <button onclick="runTask('pci-dss', 'compliance')">PCI-DSS Compliance</button>
-        <button onclick="runTask('hipaa', 'compliance')">HIPAA Compliance</button><br>
-        <button onclick="runSecurityCheck('patch_management')">Patch Management</button>
-        <button onclick="runSecurityCheck('system_hardening')">System Hardening</button>
-        <button onclick="runSecurityCheck('privilege_escalation_test')">Privilege Escalation Test</button>
-        <button onclick="runSecurityCheck('intrusion_detection')">Intrusion Detection</button>
-        
-        <!-- Output Area -->
-        <pre id="audit-results">Audit results will appear here...</pre>
+    <header>
+        <div class="logo-section">
+            <div class="logo-radar">
+                <div class="logo-radar-sweep"></div>
+            </div>
+            <div class="title-container">
+                <h1>System <span>Security Audit Suite</span></h1>
+            </div>
+        </div>
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            <span id="conn-status">ENGINE ACTIVE</span>
+        </div>
+    </header>
+
+    <!-- System Stats Sub-header -->
+    <div class="sys-overview">
+        <div class="sys-stat-card">
+            <div>
+                <div class="sys-stat-label">Total Audits Run</div>
+                <div class="sys-stat-val info" id="stat-total-scans">0</div>
+            </div>
+        </div>
+        <div class="sys-stat-card">
+            <div>
+                <div class="sys-stat-label">Compliance Success</div>
+                <div class="sys-stat-val" id="stat-compliance-score">100%</div>
+            </div>
+        </div>
+        <div class="sys-stat-card">
+            <div>
+                <div class="sys-stat-label">Alerts & Warnings</div>
+                <div class="sys-stat-val warning" id="stat-warnings">0</div>
+            </div>
+        </div>
+        <div class="sys-stat-card">
+            <div>
+                <div class="sys-stat-label">System Risk Level</div>
+                <div class="sys-stat-val" id="stat-risk-level">-</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- Sidebar Controls -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    Control Center
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="control-group">
+                    <div class="control-group-title">Host Audit (Audits)</div>
+                    <button class="action-btn" onclick="runTask('/api/firewall', 'Firewall Audit')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        Firewall Audit
+                    </button>
+                    <button class="action-btn" onclick="runTask('/api/users', 'User Audit')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        User Audit
+                    </button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-group-title">Regulatory Compliance</div>
+                    <button class="action-btn" onclick="runTask('/api/compliance/iso27001', 'ISO 27001 Compliance')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        ISO 27001 Check
+                    </button>
+                    <button class="action-btn" onclick="runTask('/api/compliance/pci-dss', 'PCI-DSS Compliance')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                        PCI-DSS Check
+                    </button>
+                    <button class="action-btn" onclick="runTask('/api/compliance/hipaa', 'HIPAA Compliance')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                        HIPAA Check
+                    </button>
+                </div>
+
+                <div class="control-group">
+                    <div class="control-group-title">Vulnerability Hardening</div>
+                    <button class="action-btn" onclick="runTask('/api/patch_management', 'Patch Management Check')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+                        Patch Management
+                    </button>
+                    <button class="action-btn" onclick="runTask('/api/system_hardening', 'System Hardening Check')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        System Hardening
+                    </button>
+                    <button class="action-btn" onclick="runTask('/api/privilege_escalation_test', 'Privilege Escalation Test')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg>
+                        Privilege Escalation
+                    </button>
+                    <button class="action-btn" onclick="runTask('/api/intrusion_detection', 'Intrusion Detection Check')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        Intrusion Detection
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Terminal Output Console -->
+        <div class="terminal-wrapper">
+            <div class="terminal-header">
+                <div class="window-dots">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-title">audit@localhost:~</div>
+                <div class="terminal-actions">
+                    <button class="term-btn" onclick="copyConsole()">Copy</button>
+                    <button class="term-btn" onclick="downloadLog()">Download</button>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal">
+                <div class="term-output" id="terminal-text">Starting Security Audit Suite v1.0.0...
+Type a command or trigger an audit action from the Control Center to begin scans.
+Waiting for audit instruction...</div>
+                <div class="scanning-indicator" id="scan-loading">
+                    <span class="scanning-spinner"></span>
+                    <span id="scan-loading-text">SCAN RUNNING...</span>
+                </div>
+                <span class="cursor"></span>
+            </div>
+        </div>
+
+        <!-- History Audit Log -->
+        <div class="panel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    Audit Trail History
+                </div>
+            </div>
+            <div class="panel-body" style="padding: 0;">
+                <div style="overflow-y: auto; max-height: calc(100vh - 290px);">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Scan Type</th>
+                                <th>Timestamp</th>
+                                <th style="text-align: right; padding-right: 12px;">Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-list">
+                            <!-- Populated dynamically -->
+                            <tr>
+                                <td colspan="3" class="no-history">Loading history log...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="history-footer">
+                <button class="clear-btn" id="btn-clear-all" onclick="clearAllHistory()" disabled>Clear All History</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // General function to handle both audits and compliance tasks
-        function runTask(type, category) {
-            const resultsContainer = document.getElementById('audit-results');
-            // Clear previous results and display loading message
-            resultsContainer.innerText = `Running ${type.toUpperCase()} ${category}... Please wait.`;
-            
-            let endpoint = category === 'audit' ? `/api/${type}` : `/api/compliance/${type}`;
-            
-            // Fetch the data from the correct API endpoint
-            fetch(endpoint)
-                .then(response => response.json())
+        let auditHistory = [];
+        let activeHistoryId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial load of history
+            fetchHistory();
+        });
+
+        // Safe HTML escape helper
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Formats console lines with color highlighting
+        function formatConsoleOutput(text) {
+            if (!text) return '';
+            const lines = text.split('\n');
+            const formatted = lines.map(line => {
+                const trimmed = line.trim();
+                let cls = '';
+                if (trimmed.toUpperCase().startsWith('PASS:') || trimmed.toUpperCase().includes('PASS:')) {
+                    cls = 'term-line-pass';
+                } else if (trimmed.toUpperCase().startsWith('FAIL:') || trimmed.toUpperCase().includes('FAIL:') || trimmed.toLowerCase().includes('error')) {
+                    cls = 'term-line-fail';
+                } else if (trimmed.toUpperCase().startsWith('WARNING:') || trimmed.toUpperCase().includes('WARNING:') || trimmed.toLowerCase().includes('warning')) {
+                    cls = 'term-line-warn';
+                } else if (trimmed.startsWith('Checking') || trimmed.startsWith('Running') || trimmed.startsWith('System Hardening') || trimmed.startsWith('Privilege Escalation')) {
+                    cls = 'term-line-info';
+                }
+                
+                if (cls) {
+                    return `<span class="${cls}">${escapeHtml(line)}</span>`;
+                }
+                return escapeHtml(line);
+            });
+            return formatted.join('\n');
+        }
+
+        // Fetch History list from backend
+        function fetchHistory() {
+            fetch('/api/history')
+                .then(res => res.json())
                 .then(data => {
-                    // Display the result in the preformatted text area
-                    resultsContainer.innerText = data.result;
+                    auditHistory = data.history || [];
+                    renderHistoryTable();
+                    updateStats();
                 })
-                .catch(error => {
-                    // Handle errors gracefully
-                    resultsContainer.innerText = `Error: ${error.message}`;
+                .catch(err => {
+                    console.error('Error fetching history:', err);
+                    document.getElementById('history-list').innerHTML = `
+                        <tr>
+                            <td colspan="3" class="no-history" style="color: var(--theme-red);">Error connecting to audit logs database.</td>
+                        </tr>`;
                 });
         }
 
-        // Function to handle security checks
-        function runSecurityCheck(type) {
-            const resultsContainer = document.getElementById('audit-results');
-            // Clear previous results and display loading message
-            resultsContainer.innerText = `Running ${type.replace('_', ' ').toUpperCase()}... Please wait.`;
+        // Render logs list table
+        function renderHistoryTable() {
+            const listContainer = document.getElementById('history-list');
+            const clearBtn = document.getElementById('btn-clear-all');
             
-            // Fetch the data from the API endpoint for security checks
-            fetch(`/api/${type}`)
-                .then(response => response.json())
+            if (auditHistory.length === 0) {
+                listContainer.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="no-history">No audit records found. Run a scan from the Control Center.</td>
+                    </tr>`;
+                clearBtn.disabled = true;
+                return;
+            }
+
+            clearBtn.disabled = false;
+            listContainer.innerHTML = '';
+            
+            auditHistory.forEach(item => {
+                const dateObj = new Date(item.date);
+                const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: '2-digit' });
+                const rowActiveCls = activeHistoryId === item.id ? 'active' : '';
+
+                const tr = document.createElement('tr');
+                tr.className = `history-row ${rowActiveCls}`;
+                tr.onclick = () => selectHistoryItem(item.id);
+                
+                tr.innerHTML = `
+                    <td class="log-type" title="${escapeHtml(item.audit_type)}">${escapeHtml(item.audit_type)}</td>
+                    <td class="log-time" title="${escapeHtml(item.date)}">${dateStr} ${timeStr}</td>
+                    <td class="row-actions">
+                        <button class="delete-btn" onclick="deleteHistoryItem(${item.id}, event)" title="Delete entry">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                        </button>
+                    </td>
+                `;
+                listContainer.appendChild(tr);
+            });
+        }
+
+        // Select a history row and dump output inside Terminal Console
+        function selectHistoryItem(id) {
+            activeHistoryId = id;
+            const item = auditHistory.find(x => x.id === id);
+            if (item) {
+                const termText = document.getElementById('terminal-text');
+                termText.innerHTML = `[Audit Log: ${escapeHtml(item.audit_type)} at ${escapeHtml(item.date)}]\n` + 
+                                     `============================================================\n` +
+                                     formatConsoleOutput(item.result);
+                
+                // Keep scroll at bottom
+                const termBody = document.getElementById('terminal');
+                termBody.scrollTop = termBody.scrollHeight;
+                
+                // Highlight active row in table
+                renderHistoryTable();
+            }
+        }
+
+        // Delete an entry from SQLite
+        function deleteHistoryItem(id, event) {
+            event.stopPropagation(); // Stop click from selecting row
+            if (confirm("Are you sure you want to delete this audit log?")) {
+                fetch(`/api/history/delete/${id}`, { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (activeHistoryId === id) {
+                            activeHistoryId = null;
+                            document.getElementById('terminal-text').innerText = 'Audit log record deleted.\nWaiting for new action...';
+                        }
+                        fetchHistory();
+                    })
+                    .catch(err => alert("Error deleting: " + err.message));
+            }
+        }
+
+        // Clear all history logs
+        function clearAllHistory() {
+            if (confirm("WARNING: Are you sure you want to wipe ALL audit trail logs? This cannot be undone.")) {
+                fetch('/api/history/clear', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                        activeHistoryId = null;
+                        document.getElementById('terminal-text').innerText = 'All SQLite logs cleared.\nWaiting for audit action...';
+                        fetchHistory();
+                    })
+                    .catch(err => alert("Error clearing history: " + err.message));
+            }
+        }
+
+        // Trigger a task scan via endpoint
+        function runTask(endpoint, title) {
+            const termText = document.getElementById('terminal-text');
+            const loadingIndicator = document.getElementById('scan-loading');
+            const loadingText = document.getElementById('scan-loading-text');
+
+            // Visually toggle running button active styling
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                if (btn.innerText.trim().includes(title) || title.includes(btn.innerText.trim())) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Put terminal in scanning state
+            termText.innerText = `sec-audit -v --local\n` + 
+                                 `Starting scan check for: ${title.toUpperCase()}\n` +
+                                 `Initializing modules and running background scripts...\n`;
+            loadingText.innerText = `AUDIT RUNNING: ${title.toUpperCase()}...`;
+            loadingIndicator.style.display = 'flex';
+
+            fetch(endpoint)
+                .then(res => res.json())
                 .then(data => {
-                    // Display the result in the preformatted text area
-                    resultsContainer.innerText = data.result;
+                    loadingIndicator.style.display = 'none';
+                    document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+
+                    // Output into terminal
+                    termText.innerHTML = `[audit@localhost:~]$ run-audit --type="${escapeHtml(title)}"\n` + 
+                                         `Scan output fetched successfully.\n` + 
+                                         `============================================================\n` + 
+                                         formatConsoleOutput(data.result);
+                    
+                    // Force terminal scroll to bottom
+                    const termBody = document.getElementById('terminal');
+                    termBody.scrollTop = termBody.scrollHeight;
+
+                    // Reload logs to include this newly saved result
+                    fetchHistory();
                 })
-                .catch(error => {
-                    // Handle errors gracefully
-                    resultsContainer.innerText = `Error: ${error.message}`;
+                .catch(err => {
+                    loadingIndicator.style.display = 'none';
+                    document.querySelectorAll('.action-btn').forEach(btn => btn.classList.remove('active'));
+                    termText.innerHTML = `<span class="term-line-fail">Error executing scan: ${escapeHtml(err.message)}</span>`;
                 });
+        }
+
+        // Calculate and update Dashboard summary statistics
+        function updateStats() {
+            document.getElementById('stat-total-scans').innerText = auditHistory.length;
+
+            let totalChecks = 0;
+            let passChecks = 0;
+            let failChecks = 0;
+            let warningChecks = 0;
+
+            auditHistory.forEach(item => {
+                const text = item.result || '';
+                
+                // Search for standard markers in output
+                const passMatches = (text.match(/PASS:/gi) || []).length;
+                const failMatches = (text.match(/FAIL:/gi) || []).length;
+                const warnMatches = (text.match(/Warning:/gi) || []).length;
+                const errMatches = (text.match(/Error/gi) || []).length;
+
+                passChecks += passMatches;
+                failChecks += (failMatches + errMatches);
+                warningChecks += warnMatches;
+            });
+
+            // Set Compliance Score
+            const compScoreVal = document.getElementById('stat-compliance-score');
+            const totalOutcomes = passChecks + failChecks;
+            if (totalOutcomes > 0) {
+                const score = Math.round((passChecks / totalOutcomes) * 100);
+                compScoreVal.innerText = `${score}%`;
+                
+                // Color formatting based on threshold
+                if (score >= 85) {
+                    compScoreVal.className = 'sys-stat-val info'; // green/blue
+                } else if (score >= 60) {
+                    compScoreVal.className = 'sys-stat-val warning';
+                } else {
+                    compScoreVal.className = 'sys-stat-val critical';
+                }
+            } else {
+                compScoreVal.innerText = '100%';
+                compScoreVal.className = 'sys-stat-val info';
+            }
+
+            // Set alerts count
+            document.getElementById('stat-warnings').innerText = warningChecks + failChecks;
+
+            // Compute overall risk label
+            const riskVal = document.getElementById('stat-risk-level');
+            if (auditHistory.length === 0) {
+                riskVal.innerText = 'UNKNOWN';
+                riskVal.className = 'sys-stat-val';
+            } else if (failChecks > 2 || warningChecks > 5) {
+                riskVal.innerText = 'HIGH';
+                riskVal.className = 'sys-stat-val critical';
+            } else if (failChecks > 0 || warningChecks > 1) {
+                riskVal.innerText = 'MEDIUM';
+                riskVal.className = 'sys-stat-val warning';
+            } else {
+                riskVal.innerText = 'LOW';
+                riskVal.className = 'sys-stat-val info';
+            }
+        }
+
+        // Terminal Actions: Copy text to clipboard
+        function copyConsole() {
+            const outputText = document.getElementById('terminal-text').innerText;
+            navigator.clipboard.writeText(outputText)
+                .then(() => alert('Terminal output copied to clipboard!'))
+                .catch(err => alert('Failed to copy: ' + err.message));
+        }
+
+        // Terminal Actions: Download log file
+        function downloadLog() {
+            const outputText = document.getElementById('terminal-text').innerText;
+            const blob = new Blob([outputText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `security_audit_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
     </script>
 </body>

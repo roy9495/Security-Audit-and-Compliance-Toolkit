@@ -1,0 +1,12 @@
+# SQLite Database
+audit_results.db
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE Settings
+.vscode/
+.idea/

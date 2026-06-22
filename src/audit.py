@@ -16,9 +16,12 @@ def run_bash_script(script_name):
     
     # Return any error messages if the script fails
     if result.returncode != 0:
-        return f"Error: {result.stderr.decode('utf-8')}"
+        error_msg = result.stderr.decode('utf-8', errors='replace')
+        if not error_msg.strip():
+            error_msg = result.stdout.decode('utf-8', errors='replace')
+        return f"Error ({result.returncode}): {error_msg}"
     
-    return result.stdout.decode('utf-8')
+    return result.stdout.decode('utf-8', errors='replace')
 
 def audit_firewall():
     """Runs the firewall audit"""
@@ -26,4 +29,4 @@ def audit_firewall():
 
 def audit_users():
     """Runs the user audit"""
-    return run_bash_script('audit_users.bat')
+    return run_bash_script('audit_users.bat')
